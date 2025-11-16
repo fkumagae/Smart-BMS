@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.DS_Store
+env/
+.venv/
+venv/
+models/
+data/final_soil_telemetry_dataset.csv
+data/telemetry_windowed_with_clusters.csv
+data/soil_with_embeddings.csv
+
