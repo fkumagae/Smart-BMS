@@ -7,7 +7,6 @@ import pandas as pd
 
 
 TELEMETRY_REQUIRED_COLS = [
-    "timestamp",
     "accel_x",
     "accel_y",
     "accel_z",
@@ -25,6 +24,27 @@ def create_windows_by_index(df: pd.DataFrame, window_size: int) -> pd.DataFrame:
     """
     if df.empty:
         raise ValueError("Telemetry dataframe is empty.")
+
+    df = df.copy()
+
+    # Map colunas reais para nomes canônicos usados nas features
+    accel_map = {
+        "accel_x": "calibrated_accel_x (m/s^2)",
+        "accel_y": "calibrated_accel_y (m/s^2)",
+        "accel_z": "calibrated_accel_z (m/s^2)",
+    }
+    for target, source in accel_map.items():
+        if target not in df.columns and source in df.columns:
+            df[target] = df[source]
+
+    gyro_map = {
+        "gyro_x": "calibrated_gyro_x (deg/s)",
+        "gyro_y": "calibrated_gyro_y (deg/s)",
+        "gyro_z": "calibrated_gyro_z (deg/s)",
+    }
+    for target, source in gyro_map.items():
+        if target not in df.columns and source in df.columns:
+            df[target] = df[source]
 
     # Ensure required columns exist; create NaN columns if missing
     for col in TELEMETRY_REQUIRED_COLS:
@@ -94,4 +114,3 @@ def create_windows_by_index(df: pd.DataFrame, window_size: int) -> pd.DataFrame:
 
     telemetry_windowed = pd.DataFrame.from_records(records)
     return telemetry_windowed
-

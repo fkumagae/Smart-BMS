@@ -37,8 +37,10 @@ def cluster_telemetry(
     df = df_features.copy()
     X = df[feature_cols].values
 
-    # Handle NaNs by simple imputation (mean per column)
+    # Handle NaNs by simple imputation (mean per column).
+    # Se a coluna inteira for NaN, substituímos por 0.
     col_means = np.nanmean(X, axis=0)
+    col_means = np.where(np.isnan(col_means), 0.0, col_means)
     inds = np.where(np.isnan(X))
     X[inds] = np.take(col_means, inds[1])
 
@@ -46,3 +48,37 @@ def cluster_telemetry(
     df["cluster_label"] = kmeans.fit_predict(X)
     return df
 
+
+def compute_elbow_inertia(
+    df_features: pd.DataFrame,
+    k_range: Iterable[int],
+    feature_cols: Iterable[str] | None = None,
+) -> pd.DataFrame:
+    """Calcula a inércia (soma das distâncias ao centróide) para vários K.
+
+    Útil para aplicar a "regra do cotovelo" e escolher o número de clusters.
+    """
+    if df_features.empty:
+        raise ValueError("df_features is empty.")
+
+    feature_cols = list(feature_cols) if feature_cols is not None else DEFAULT_CLUSTER_FEATURES
+    feature_cols = [c for c in feature_cols if c in df_features.columns]
+    if not feature_cols:
+        raise ValueError("No valid feature columns found for clustering.")
+
+    df = df_features.copy()
+    X = df[feature_cols].values
+
+    # mesma imputação usada no cluster_telemetry
+    col_means = np.nanmean(X, axis=0)
+    col_means = np.where(np.isnan(col_means), 0.0, col_means)
+    inds = np.where(np.isnan(X))
+    X[inds] = np.take(col_means, inds[1])
+
+    results = []
+    for k in k_range:
+        km = KMeans(n_clusters=k, random_state=RANDOM_SEED, n_init="auto")
+        km.fit(X)
+        results.append({"k": k, "inertia": km.inertia_})
+
+    return pd.DataFrame(results)

@@ -23,3 +23,6 @@ WINDOW_SIZE = 128  # number of raw samples per window
 
 # Dimensionality reduction
 PCA_COMPONENTS = 4
+
+# Clustering
+N_CLUSTERS = 6  # número de clusters escolhido pela regra do cotovelo

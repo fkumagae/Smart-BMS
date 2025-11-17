@@ -6,5 +6,10 @@ env/
 venv/
 models/
 data/raw/
-data/processed/
+
+# Ignorar CSVs por padrão (dados brutos / intermediários)
 *.csv
+
+# Mas manter alguns resultados de clusterização no versionamento
+!data/processed/telemetry_windowed_with_clusters.csv
+!data/processed/final_soil_telemetry_dataset.csv

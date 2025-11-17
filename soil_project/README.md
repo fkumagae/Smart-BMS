@@ -16,6 +16,7 @@ soil_project/
 ├── notebooks/                   # Notebooks opcionais para EDA/experimentos
 ├── scripts/                     # Scripts de alto nível da pipeline
 │   ├── merge_telemetry.py       # Une os CSVs brutos em um único telemetry.csv
+│   ├── cluster_elbow.py         # Calcula e plota gráfico de elbow (escolha de K)
 │   ├── build_dataset.py         # Constrói o dataset supervisionado final
 │   ├── train_model.py           # Treina e avalia o classificador
 │   └── run_full_pipeline.py     # Executa build + treino em sequência
@@ -136,6 +137,14 @@ Nesta primeira versão, o rótulo de tipo de solo é gerado apenas a partir da t
 
 ```bash
 cd soil_project
+# criar estrutura mínima de dados (se ainda não existir)
+mkdir -p data/raw/SensorData
+
+# coloque seus CSVs brutos em subpastas de data/raw/SensorData, por exemplo:
+# data/raw/SensorData/2020-07-28-06-01-11/accelerometer_calibrated_split.csv
+# data/raw/SensorData/2020-07-28-06-01-11/gyroscope_calibrated_split.csv
+# data/raw/SensorData/2020-07-28-06-01-11/record.csv
+
 python scripts/merge_telemetry.py
 ```
 
@@ -144,6 +153,8 @@ python scripts/merge_telemetry.py
 ```bash
 python scripts/build_dataset.py
 ```
+
+> Dica: antes de fixar o número de clusters, você pode usar `scripts/cluster_elbow.py` para gerar o gráfico de elbow e ajudar a escolher um bom valor de `N_CLUSTERS` em `soil_dataset/config.py`.
 
 3. Treinar o classificador de tipo de solo:
 
@@ -162,4 +173,3 @@ python scripts/run_full_pipeline.py
 - O código assume colunas de exemplo na telemetria (como as listadas acima), podendo ser adaptado ao seu dataset real.
 - As heurísticas de mapeamento cluster → tipo de solo são simplificadas e devem ser refinadas com base em conhecimento físico/terramecânico e dados reais.
 - A integração com um dataset de solo (ex.: LUCAS Soil) e o uso de embeddings PCA podem ser adicionados posteriormente, sem quebrar a pipeline atual.
-

@@ -1,5 +1,13 @@
 from __future__ import annotations
 
+from pathlib import Path
+import sys
+
+# garante que o pacote soil_dataset seja encontrado
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 from soil_dataset import config
 from soil_dataset.data_loading import load_telemetry
 from soil_dataset.telemetry_processing import create_windows_by_index
@@ -27,8 +35,10 @@ def main() -> None:
     )
 
     # Clustering
-    print("\nClustering telemetry windows...")
-    telemetry_windowed = cluster_telemetry(telemetry_windowed)
+    print(f"\nClustering telemetry windows with K={config.N_CLUSTERS} ...")
+    telemetry_windowed = cluster_telemetry(
+        telemetry_windowed, n_clusters=config.N_CLUSTERS
+    )
 
     # Compute cluster stats and map to soil types
     print("\nComputing cluster statistics and mapping to soil types...")
