@@ -53,6 +53,8 @@ soil_project/data/raw/SensorData/
 └─ ...
 ```
 
+> Como `SensorData` e pesado, ele nao esta no GitHub. Quando receber o ZIP (com as 5 pastas), extraia **as 5 pastas diretamente para `data/raw/SensorData/`**. O resultado esperado e `data/raw/SensorData/<nome-da-pasta>/[arquivos.csv]`.
+
 Para cada pasta de sessao, o script:
 
 1) Le acelerometro/giroscopio (arquivos calibrados) e record.csv.
