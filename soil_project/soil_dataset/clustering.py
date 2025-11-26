@@ -35,6 +35,18 @@ def cluster_telemetry(
         raise ValueError("No valid feature columns found for clustering.")
 
     df = df_features.copy()
+
+    # Remove features sem variancia para evitar clusters degenerados.
+    feature_stds = df[feature_cols].std()
+    zero_var_cols = [c for c, std in feature_stds.items() if np.isnan(std) or std < 1e-9]
+    if zero_var_cols:
+        feature_cols = [c for c in feature_cols if c not in zero_var_cols]
+    if not feature_cols:
+        raise ValueError(
+            "Todas as features selecionadas tem variancia zero/NaN. "
+            "Verifique se a telemetria esta constante ou se o janelamento retornou valores nulos."
+        )
+
     X = df[feature_cols].values
 
     # Handle NaNs by simple imputation (mean per column).
@@ -43,6 +55,15 @@ def cluster_telemetry(
     col_means = np.where(np.isnan(col_means), 0.0, col_means)
     inds = np.where(np.isnan(X))
     X[inds] = np.take(col_means, inds[1])
+
+    # Se existirem poucos pontos distintos, o KMeans pode colapsar em 1 cluster.
+    distinct_points = np.unique(np.round(X, decimals=6), axis=0).shape[0]
+    if distinct_points < n_clusters:
+        raise ValueError(
+            f"Apenas {distinct_points} pontos distintos para {n_clusters} clusters. "
+            "Isso gera todos os rotulos iguais. "
+            "Reduza N_CLUSTERS ou verifique se as features nao estao constantes/nulas."
+        )
 
     kmeans = KMeans(n_clusters=n_clusters, random_state=RANDOM_SEED, n_init="auto")
     df["cluster_label"] = kmeans.fit_predict(X)

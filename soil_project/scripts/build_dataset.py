@@ -16,6 +16,7 @@ from soil_dataset.cluster_to_soil_mapping import (
     apply_cluster_soil_mapping,
     compute_cluster_stats,
     map_clusters_to_soil_types,
+    map_clusters_to_operation_modes,
 )
 
 
@@ -44,11 +45,14 @@ def main() -> None:
     print("\nComputing cluster statistics and mapping to soil types...")
     cluster_stats = compute_cluster_stats(telemetry_windowed)
     cluster_mapping = map_clusters_to_soil_types(cluster_stats)
+    mode_mapping = map_clusters_to_operation_modes(cluster_stats)
     print("Cluster -> soil_type mapping:", cluster_mapping)
+    print("Cluster -> operation_mode mapping:", mode_mapping)
 
     telemetry_with_soil = apply_cluster_soil_mapping(
         telemetry_windowed, cluster_mapping
     )
+    telemetry_with_soil["operation_mode"] = telemetry_with_soil["cluster_label"].map(mode_mapping)
 
     # Neste estágio inicial, usamos apenas telemetria + heurísticas
     # terramecânicas: o rótulo final é soil_type derivado de clusters.
@@ -56,10 +60,10 @@ def main() -> None:
         columns={"soil_type_cluster": "soil_type"}
     )
 
-    cols_order = ["sample_id", "soil_type"] + [
+    cols_order = ["sample_id", "soil_type", "operation_mode"] + [
         c
         for c in df_final.columns
-        if c not in {"sample_id", "soil_type"}
+        if c not in {"sample_id", "soil_type", "operation_mode"}
     ]
     df_final = df_final[cols_order]
 
